@@ -1,0 +1,12 @@
+﻿@model TaskPlanner.Models.Task
+
+<div id="form_@Model.Id">
+    @using (Ajax.BeginForm(new AjaxOptions() { HttpMethod = "POST", OnSuccess = "AddSubTask", Url = Url.Action("CreateSubTask")}))
+    {
+        @Html.AntiForgeryToken()
+        <input hidden="hidden" name="taskId" value="@Model.Id" />
+        @Html.Label("Text")
+        <input name="text" type="text"/>
+    <button type="submit" value="Submit">Добавить</button>
+    }
+</div>

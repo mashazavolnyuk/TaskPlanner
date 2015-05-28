@@ -1,0 +1,8 @@
+﻿@model TaskPlanner.Models.Category
+
+@using (Html.BeginForm())
+{  
+    @Html.EditorFor(x=>x.Name)
+    <button type="submit" value="Create">Create</button>
+}
+

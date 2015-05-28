@@ -1,0 +1,6 @@
+﻿@model TaskPlanner.Models.Subtask
+
+<li>
+    <input data-val="true" data-val-required="Требуется поле isFinish." id="subtask_isFinish_@Model.Id" name="subtask.isFinish" type="checkbox" value="true" checked="@Model.isFinish" class="subTask_@Model.TaskId" onclick="UpdateSubTask(@Model.Id);">
+    @Html.DisplayFor(model => Model.text)
+</li>

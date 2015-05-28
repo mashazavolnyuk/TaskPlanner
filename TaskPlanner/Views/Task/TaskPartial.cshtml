@@ -1,0 +1,22 @@
+﻿@using TaskPlanner.Models
+@model TaskPlanner.Models.Task
+
+<li>
+    <input id="Finish_@Model.Id" name="Model.isFinish" type="checkbox" value="@Model.isFinish" checked="@Model.isFinish" onclick="UpdateTask(@Model.Id);">
+    @Html.DisplayFor(model => Model.text) <a href="#" value="createSubtask" onclick="ShowCreateSubTaskPanel(@Model.Id);">Create new subtask</a>
+
+    @if (Model.Subtask != null)
+    {
+        <ul style="list-style: none;" id="list_@Model.Id">
+            @foreach (Subtask subtask in Model.Subtask)
+            {
+                Html.RenderPartial("SubTaskView", subtask);
+            }
+        </ul>
+    }
+
+    @{Html.RenderPartial("CreateSubTask", Model);}
+
+    <hr />
+</li>
+

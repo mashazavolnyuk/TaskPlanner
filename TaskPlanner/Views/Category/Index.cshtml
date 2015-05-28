@@ -1,0 +1,15 @@
+﻿@model List<TaskPlanner.Models.Category>
+
+@{
+    Layout = null;
+}
+@Html.ActionLink("Task","Index","Task")
+<h1>Category</h1>
+
+@Html.ActionLink("Create new","Create","Category")
+<ul>
+    @foreach (var category in Model)
+    {
+        <li>@category.Name</li>
+    }
+</ul>
