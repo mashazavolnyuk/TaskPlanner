@@ -1,14 +1,13 @@
-﻿@using TaskPlanner.Models
-@model System.Collections.Generic.List<TaskPlanner.Models.Task>
+﻿@model List<TaskPlanner.Models.Task>
 
-    <ol>
-        @foreach (var task in Model)
-        {
-            Html.RenderPartial("TaskPartial", task);
-            Html.ActionLink("Create", "CreateSubTask", "Task");
-        }
-    </ol>
-
-@Html.ActionLink("Delete", "Delete", "Task")
-
-
+<h1>Tasks</h1>
+<ol>
+    @foreach (var task in Model)
+    {
+        Html.RenderPartial("TaskPartial", task);
+        Html.ActionLink("Create", "CreateSubTask", "Task");
+    }
+</ol>
+@Html.ActionLink("Create new task", "Create", "Task")
+@Html.ActionLink("Delete checked", "Delete", "Task")
+@Html.ActionLink("List Category", "Index", "Category")

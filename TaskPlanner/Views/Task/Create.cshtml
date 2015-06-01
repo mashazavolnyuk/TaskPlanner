@@ -10,7 +10,7 @@
     <fieldset>
         <legend>TaskInputModel</legend>
 
-        @Html.DropDownList("CategoryId", null, new { @name = "CategoryId" });
+        @Html.DropDownList("CategoryId", null, new {@name = "CategoryId"});
 
         <div class="editor-label">
             @Html.LabelFor(model => model.Text)
@@ -28,20 +28,8 @@
             @Html.ValidationMessageFor(model => model.Date)
         </div>
 
-        <h3>SubTasks</h3>
-        @for (int i = 0; i < 5; i++)
-        {
-            <div class="editor-label">
-                @Html.LabelFor(model => model.SubTasks[i].Text)
-            </div>
-            <div class="editor-field">
-                @Html.EditorFor(model => model.SubTasks[i].Text)
-                @Html.ValidationMessageFor(model => model.SubTasks[i].Text)
-            </div>
-        }
-
         <p>
-            <input type="submit" value="Create" />
+            <input type="submit" value="Create"/>
         </p>
     </fieldset>
 }

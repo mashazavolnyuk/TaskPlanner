@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Migrations;
-using System.Linq;
-using System.Web;
+﻿using System.Linq;
 using System.Web.Mvc;
 using TaskPlanner.Models;
 
@@ -10,18 +6,16 @@ namespace TaskPlanner.Controllers
 {
     public class TaskController : Controller
     {
-        private TaskPlannerDbEntities db = new TaskPlannerDbEntities();
-        private Task newTask = new Task();
-        private Subtask sb = new Subtask();
+        private readonly TaskPlannerDbEntities _db = new TaskPlannerDbEntities();
 
         public ActionResult Index()
         {
-            return View(db.Task.ToList());
+            return View(_db.Task.ToList());
         }
 
         public ActionResult Create()
         {
-            ViewBag.CategoryId = new SelectList(from c in db.Category select new {Id = c.Id, Name = c.Name}, "Id",
+            ViewBag.CategoryId = new SelectList(from c in _db.Category select new {c.Id, c.Name}, "Id",
                 "Name");
             return View();
         }
@@ -29,88 +23,75 @@ namespace TaskPlanner.Controllers
         [HttpPost]
         public ActionResult Create(TaskInputModel model)
         {
-
-            newTask.CategoryId = model.CategoryId;
-
-            newTask.date = model.Date;
-            newTask.text = model.Text;
-
-            foreach (var st in model.SubTasks)
+            var newTask = new Task
             {
+                CategoryId = model.CategoryId,
+                date = model.Date,
+                text = model.Text
+            };
 
-                sb.text = st.Text;
-                newTask.Subtask.Add(sb);
-            }
 
-            db.Task.Add(newTask);
-            db.SaveChanges();
+            _db.Task.Add(newTask);
+            _db.SaveChanges();
+
             return RedirectToAction("Index");
-
         }
 
         public ActionResult Delete()
         {
-            return View("Index");
+            var finishedTask = (from task in _db.Task where task.isFinish select task).ToList();
 
-        }
-
-        [HttpPost]
-        public ActionResult Delete(Task model)
-        {
-
-            newTask.isFinish = model.isFinish;
-            if (newTask.isFinish)
+            for (var i = finishedTask.Count - 1; i >= 0; i--)
             {
-                db.Task.Remove(newTask);
-                db.SaveChanges();
+                var task = finishedTask[i];
+                if (task.isFinish)
+                {
+                    var finishedSubTask = task.Subtask.ToList();
+
+                    for (var j = finishedSubTask.Count - 1; j >= 0; j--)
+                    {
+                        _db.Subtask.Remove(finishedSubTask[j]);
+                    }
+                    _db.Task.Remove(task);
+                }
             }
+            _db.SaveChanges();
             return RedirectToAction("Index");
-
         }
-
 
         [HttpPost]
         public ActionResult UpdateTaskState(int taskId)
         {
-            Task task = db.Task.Find(taskId);
+            var task = _db.Task.Find(taskId);
             if (task != null)
             {
                 task.isFinish = !task.isFinish;
                 if (task.isFinish)
                 {
-                    foreach (Subtask subtask in task.Subtask)
+                    foreach (var subtask in task.Subtask)
                     {
                         subtask.isFinish = true;
                     }
                 }
-                db.SaveChanges();
+                _db.SaveChanges();
                 var subtasks = task.Subtask.Select(x => new {x.Id, x.isFinish}).ToList();
                 return Json(new {task.Id, task.isFinish, subtasks}, JsonRequestBehavior.AllowGet);
             }
-
             return Json("fail");
         }
-
 
         [HttpPost]
         public ActionResult UpdateSubTaskState(int subTaskId)
         {
-            Subtask subtask = db.Subtask.Find(subTaskId);
+            var subtask = _db.Subtask.Find(subTaskId);
             if (subtask != null)
             {
                 subtask.isFinish = !subtask.isFinish;
 
-                Task parentTask = subtask.Task;
-                if (parentTask.Subtask.Count(x => x.isFinish) == parentTask.Subtask.Count)
-                {
-                    parentTask.isFinish = true;
-                }
-                else
-                {
-                    parentTask.isFinish = false;
-                }
+                var parentTask = subtask.Task;
+                parentTask.isFinish = parentTask.Subtask.Count(x => x.isFinish) == parentTask.Subtask.Count;
 
-                db.SaveChanges();
+                _db.SaveChanges();
                 var subtasks = parentTask.Subtask.Select(x => new {x.Id, x.isFinish}).ToList();
                 return Json(new {parentTask.Id, parentTask.isFinish, subtasks}, JsonRequestBehavior.AllowGet);
             }
@@ -118,20 +99,18 @@ namespace TaskPlanner.Controllers
             return Json("fail");
         }
 
-
-
         [HttpPost]
         public ActionResult CreateSubTask(int taskId, string text)
         {
-            Task parent = db.Task.Find(taskId);
+            var parent = _db.Task.Find(taskId);
             if (parent != null)
             {
-                var newSubtask = new Subtask() {text = text};
+                var newSubtask = new Subtask {text = text};
                 parent.Subtask.Add(newSubtask);
-                db.SaveChanges();
+                parent.isFinish = false;
+                _db.SaveChanges();
                 return PartialView("SubTaskView", newSubtask);
             }
-
             return null;
         }
     }
